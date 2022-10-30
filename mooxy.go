@@ -11,8 +11,7 @@ type Router struct {
 }
 
 func (r *Router) Handle (route *Route, handler http.Handler) {
-    var path = route.getPath()
-    var pathParts = getPathParts(path)
+    var pathParts = getPathParts(route.Path)
     var lastElementIndex = len(pathParts) - 1
 
     currentMatrix := r.NextRoutes
@@ -52,29 +51,4 @@ func getPathParts(path string) []string {
 
 func NewRouter() *Router {
     return &Router{ NextRoutes: make(map[string]*Router)}
-}
-
-type Route struct {
-    path string
-    methods []string
-}
-
-func (r *Route) getPath() string {
-    return r.path
-}
-
-// set path for route
-func (r *Route) Path(path string) *Route {
-    r.path = path
-    return r
-}
-
-// set allowed methods for route
-func (r *Route) Methods(methods []string) *Route {
-    r.methods = methods
-    return r
-}
-
-func NewRoute(path string) *Route {
-    return &Route { path: path, methods: []string{http.MethodGet, http.MethodPost} }
 }
