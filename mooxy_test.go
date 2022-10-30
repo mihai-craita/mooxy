@@ -27,6 +27,7 @@ var testCases = []TestCase {
     {"/post/list", "/post/list", "third simple route match"},
     {"/foo/bar", "/foo/bar", "fourth simple route match with parents already defined"},
     {"/long/path/to/url/long", "/long/path/to/url/long", "long path to url"},
+    {"/trailing/slash", "/trailing/slash/", "should match a request with trailing slash"},
     // {"/bar/{id}", "/bar/1", "route with param"},
 }
 
