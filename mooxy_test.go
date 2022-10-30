@@ -24,7 +24,9 @@ type TestCase struct {
 var testCases = []TestCase {
     {"/foo", "/foo", "simple route match"},
     {"/bar", "/bar", "second simple route match"},
-    {"/zoo/bar", "/zoo/bar", "third simple route match"},
+    {"/post/list", "/post/list", "third simple route match"},
+    {"/foo/bar", "/foo/bar", "fourth simple route match with parents already defined"},
+    {"/long/path/to/url/long", "/long/path/to/url/long", "long path to url"},
     // {"/bar/{id}", "/bar/1", "route with param"},
 }
 
@@ -36,7 +38,7 @@ func TestRouter(t *testing.T) {
         router.Handle(NewRoute(test.handlerPath), handler)
     }
 
-    t.Log(router.NextRoutes)
+    // t.Log(router.NextRoutes)
 
     for _, test := range testCases{
         req := httptest.NewRequest(http.MethodGet, test.requestPath, nil)
@@ -48,9 +50,9 @@ func TestRouter(t *testing.T) {
         resp := w.Result()
         body, _ := io.ReadAll(resp.Body)
 
-        t.Log(resp.StatusCode)
-        t.Log(resp.Header.Get("Content-Type"))
-        t.Log(string(body))
+        // t.Log(resp.StatusCode)
+        // t.Log(resp.Header.Get("Content-Type"))
+        // t.Log(string(body))
 
         if (resp.StatusCode != 200) {
             t.Errorf("Status code should be 200 got %d", resp.StatusCode)

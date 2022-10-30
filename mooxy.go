@@ -6,7 +6,7 @@ import (
 )
 
 type Router struct {
-    NextRoutes map[string]Router
+    NextRoutes map[string]*Router
     Handler http.Handler
 }
 
@@ -17,13 +17,15 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
 
     currentMatrix := r.NextRoutes
     for index, p := range pathParts{
-        nodeToBeAdded := Router{NextRoutes: make(map[string]Router)}
+        var c = currentMatrix[p]
+        if c == nil {
+            currentMatrix[p] = NewRouter()
+        }
         if (index == lastElementIndex) {
-            nodeToBeAdded.Handler = handler
+            currentMatrix[p].Handler = handler
         }
 
-        currentMatrix[p] = nodeToBeAdded
-        currentMatrix = nodeToBeAdded.NextRoutes
+        currentMatrix = currentMatrix[p].NextRoutes
     }
 }
 
@@ -32,13 +34,14 @@ func (router *Router) GetServer(w http.ResponseWriter, r *http.Request) {
     var path = r.URL.Path
     var pathParts = getPathParts(path)
     var currentMatrix = router.NextRoutes
+    var handler = router.Handler
     for _, p := range pathParts {
+        handler = currentMatrix[p].Handler
         if len(currentMatrix[p].NextRoutes) > 0 {
             currentMatrix = currentMatrix[p].NextRoutes
-        } else {
-            currentMatrix[p].Handler.ServeHTTP(w, r)
         }
     }
+    handler.ServeHTTP(w, r)
 }
 
 func getPathParts(path string) []string {
@@ -48,7 +51,7 @@ func getPathParts(path string) []string {
 }
 
 func NewRouter() *Router {
-    return &Router{ NextRoutes: make(map[string]Router)}
+    return &Router{ NextRoutes: make(map[string]*Router)}
 }
 
 type Route struct {
