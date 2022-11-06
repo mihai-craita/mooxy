@@ -19,15 +19,16 @@ type TestCase struct {
     handlerPath string
     requestPath string
     handlerOutput string
+    method string
 }
 
 var testCases = []TestCase {
-    {"/foo", "/foo", "simple route match"},
-    {"/bar", "/bar", "second simple route match"},
-    {"/post/list", "/post/list", "third simple route match"},
-    {"/foo/bar", "/foo/bar", "fourth simple route match with parents already defined"},
-    {"/long/path/to/url/long", "/long/path/to/url/long", "long path to url"},
-    {"/trailing/slash", "/trailing/slash/", "should match a request with trailing slash"},
+    {"/foo",                   "/foo",                   "simple route match",                         http.MethodGet},
+    {"/bar",                   "/bar",                   "second simple route match",                  http.MethodGet},
+    {"/post/list",             "/post/list",             "third simple route match",                   http.MethodGet},
+    {"/foo/bar",               "/foo/bar",               "simple route with root already defined",     http.MethodGet},
+    {"/long/path/to/url/long", "/long/path/to/url/long", "long path to url",                           http.MethodGet},
+    {"/trailing/slash",        "/trailing/slash/",       "should match a request with trailing slash", http.MethodGet},
     // {"/bar/{id}", "/bar/1", "route with param"},
 }
 
@@ -42,7 +43,7 @@ func TestRouter(t *testing.T) {
     // t.Log(router.NextRoutes)
 
     for _, test := range testCases{
-        req := httptest.NewRequest(http.MethodGet, test.requestPath, nil)
+        req := httptest.NewRequest(test.method, test.requestPath, nil)
         w := httptest.NewRecorder()
 
         // make the call
