@@ -29,6 +29,8 @@ var testCases = []TestCase {
     {"/foo/bar",               "/foo/bar",               "simple route with root already defined",     http.MethodGet},
     {"/long/path/to/url/long", "/long/path/to/url/long", "long path to url",                           http.MethodGet},
     {"/trailing/slash",        "/trailing/slash/",       "should match a request with trailing slash", http.MethodGet},
+    // {"/multi-method-request",  "/multi-method-request",        "post", http.MethodPost},
+    // {"/multi-method-request",  "/multi-method-request",        "get", http.MethodGet},
     // {"/bar/{id}", "/bar/1", "route with param"},
 }
 
@@ -37,7 +39,11 @@ func TestRouter(t *testing.T) {
 
     for _, test := range testCases{
         var handler = Controller{test.handlerOutput}
-        router.Handle(NewRoute(test.handlerPath), handler)
+        var route = NewRoute(test.handlerPath);
+        if (test.method != http.MethodGet) {
+            route.Methods([]string {http.MethodGet, http.MethodPost})
+        }
+        router.Handle(route, handler)
     }
 
     // t.Log(router.NextRoutes)

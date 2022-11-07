@@ -2,6 +2,7 @@ package mooxy
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -30,17 +31,23 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
 
 func (router *Router) GetServer(w http.ResponseWriter, r *http.Request) {
     // here we will match to the correct handler and ServeHTTP
-    var path = r.URL.Path
+    var handler = router.getHandlerForUrl(*r.URL)
+    handler.ServeHTTP(w, r)
+}
+
+func (router *Router) getHandlerForUrl(u url.URL) (h http.Handler) {
+    var path = u.Path
     var pathParts = getPathParts(path)
+
     var currentMatrix = router.NextRoutes
     var handler = router.Handler
     for _, p := range pathParts {
         handler = currentMatrix[p].Handler
-        if len(currentMatrix[p].NextRoutes) > 0 {
+        if len(currentMatrix[p].NextRoutes) != 0 {
             currentMatrix = currentMatrix[p].NextRoutes
         }
     }
-    handler.ServeHTTP(w, r)
+    return handler
 }
 
 func getPathParts(path string) []string {
