@@ -4,11 +4,14 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+    "errors"
 )
 
 type Router struct {
     NextRoutes map[string]*Router
-    Handler http.Handler
+    Handler *http.Handler
+    //AvailableMethods HttpMethodsArray
+    AvailableMethods []string
 }
 
 func (r *Router) Handle (route *Route, handler http.Handler) {
@@ -22,7 +25,7 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
             currentMatrix[p] = NewRouter()
         }
         if (index == lastElementIndex) {
-            currentMatrix[p].Handler = handler
+            currentMatrix[p].Handler = &handler
         }
 
         currentMatrix = currentMatrix[p].NextRoutes
@@ -31,23 +34,31 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
 
 func (router *Router) GetServer(w http.ResponseWriter, r *http.Request) {
     // here we will match to the correct handler and ServeHTTP
-    var handler = router.getHandlerForUrl(*r.URL)
+    var handler, err = router.getHandlerForUrl(*r.URL)
+    if (err != nil) {
+        http.Error(w, err.Error(), 404)
+        return
+    }
     handler.ServeHTTP(w, r)
 }
 
-func (router *Router) getHandlerForUrl(u url.URL) (h http.Handler) {
+func (router *Router) getHandlerForUrl(u url.URL) (h http.Handler, er error) {
     var path = u.Path
     var pathParts = getPathParts(path)
 
     var currentMatrix = router.NextRoutes
     var handler = router.Handler
     for _, p := range pathParts {
-        handler = currentMatrix[p].Handler
-        if len(currentMatrix[p].NextRoutes) != 0 {
-            currentMatrix = currentMatrix[p].NextRoutes
+        var routerForPath = currentMatrix[p]
+        if (routerForPath == nil) {
+            return nil, errors.New("Page not found.")
+        }
+        handler = routerForPath.Handler
+        if len(routerForPath.NextRoutes) != 0 {
+            currentMatrix = routerForPath.NextRoutes
         }
     }
-    return handler
+    return *handler, nil
 }
 
 func getPathParts(path string) []string {
