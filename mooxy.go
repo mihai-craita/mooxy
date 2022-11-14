@@ -1,17 +1,21 @@
 package mooxy
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"strings"
-    "errors"
+
+	"golang.org/x/exp/slices"
 )
+
+type HTTPMethod string
 
 type Router struct {
     NextRoutes map[string]*Router
     Handler *http.Handler
     //AvailableMethods HttpMethodsArray
-    AvailableMethods []string
+    AvailableMethods []HTTPMethod
 }
 
 func (r *Router) Handle (route *Route, handler http.Handler) {
@@ -26,6 +30,7 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
         }
         if (index == lastElementIndex) {
             currentMatrix[p].Handler = &handler
+            currentMatrix[p].AvailableMethods = route.methods
         }
 
         currentMatrix = currentMatrix[p].NextRoutes
@@ -34,31 +39,40 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
 
 func (router *Router) GetServer(w http.ResponseWriter, r *http.Request) {
     // here we will match to the correct handler and ServeHTTP
-    var handler, err = router.getHandlerForUrl(*r.URL)
+    var foundRouter, err = router.getRouterForUrl(*r.URL)
+
     if (err != nil) {
         http.Error(w, err.Error(), 404)
+        return
+    }
+
+    rt := *foundRouter
+    handler := *rt.Handler
+
+    available := rt.AvailableMethods
+    if ( !slices.Contains(available, HTTPMethod(r.Method))) {
+        http.Error(w, "Method not available", 405)
         return
     }
     handler.ServeHTTP(w, r)
 }
 
-func (router *Router) getHandlerForUrl(u url.URL) (h http.Handler, er error) {
+func (router *Router) getRouterForUrl(u url.URL) (h *Router, er error) {
     var path = u.Path
     var pathParts = getPathParts(path)
 
     var currentMatrix = router.NextRoutes
-    var handler = router.Handler
+    var routerForPath = router
     for _, p := range pathParts {
-        var routerForPath = currentMatrix[p]
+        routerForPath = currentMatrix[p]
         if (routerForPath == nil) {
             return nil, errors.New("Page not found.")
         }
-        handler = routerForPath.Handler
         if len(routerForPath.NextRoutes) != 0 {
             currentMatrix = routerForPath.NextRoutes
         }
     }
-    return *handler, nil
+    return routerForPath, nil
 }
 
 func getPathParts(path string) []string {

@@ -15,20 +15,26 @@ func (c Controller) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     io.WriteString(w, c.content)
 }
 
+type TestOutput struct {
+    Body string
+    StatusCode int
+}
+
 type TestCase struct {
     route *Route
     requestPath string
     requestMethod string
-    handlerOutput string
+    output TestOutput
 }
 
 var testCases = []TestCase {
-    {NewRoute("/foo").Methods([]string {http.MethodGet}),                   "/foo",                   http.MethodGet, "simple route match",                         },
-    {NewRoute("/bar").Methods([]string {http.MethodGet}),                   "/bar",                   http.MethodGet, "second simple route match",                  },
-    {NewRoute("/post/list").Methods([]string {http.MethodGet}),             "/post/list",             http.MethodGet, "third simple route match",                   },
-    {NewRoute("/foo/bar").Methods([]string {http.MethodGet}),               "/foo/bar",               http.MethodGet, "simple route with root already defined",     },
-    {NewRoute("/long/path/to/url/long").Methods([]string {http.MethodGet}), "/long/path/to/url/long", http.MethodGet, "long path to url",                           },
-    {NewRoute("/trailing/slash").Methods([]string {http.MethodGet}),        "/trailing/slash/",       http.MethodGet, "should match a request with trailing slash", },
+    {NewRoute("/foo").Methods(http.MethodGet),                   "/foo",                   http.MethodGet, TestOutput{"simple route match", 200},                         },
+    {NewRoute("/bar").Methods(http.MethodGet),                   "/bar",                   http.MethodGet, TestOutput{"second simple route match", 200},                  },
+    {NewRoute("/post/list").Methods(http.MethodGet),             "/post/list",             http.MethodGet, TestOutput{"third simple route match", 200},                   },
+    {NewRoute("/foo/bar").Methods(http.MethodGet),               "/foo/bar",               http.MethodGet, TestOutput{"simple route with root already defined", 200},     },
+    {NewRoute("/long/path/to/url/long").Methods(http.MethodGet), "/long/path/to/url/long", http.MethodGet, TestOutput{"long path to url", 200},                           },
+    {NewRoute("/trailing/slash").Methods(http.MethodGet),        "/trailing/slash/",       http.MethodGet, TestOutput{"should match a request with trailing slash", 200}, },
+    {NewRoute("/foo/method/post").Methods(http.MethodPost, http.MethodConnect),      "/foo/method/post",               http.MethodGet, TestOutput{"Method not available\n", 405},     },
     // {"/multi-method-request",  "/multi-method-request",        "post", http.MethodPost},
     // {"/multi-method-request",  "/multi-method-request",        "get", http.MethodGet},
     // {"/bar/{id}", "/bar/1", "route with param"},
@@ -38,7 +44,7 @@ func TestRouter(t *testing.T) {
     var router = NewRouter()
 
     for _, test := range testCases{
-        var handler = Controller{test.handlerOutput}
+        var handler = Controller{test.output.Body}
         router.Handle(test.route, handler)
     }
 
@@ -56,11 +62,11 @@ func TestRouter(t *testing.T) {
         // t.Log(resp.Header.Get("Content-Type"))
         // t.Log(string(body))
 
-        if (resp.StatusCode != 200) {
-            t.Errorf("Status code should be 200 got %d", resp.StatusCode)
+        if (resp.StatusCode != test.output.StatusCode) {
+            t.Errorf("Status code should be %d got %d", test.output.StatusCode, resp.StatusCode)
         }
-        if (string(body) != test.handlerOutput) {
-            t.Errorf("Response should be " + test.handlerOutput + " got %s", string(body))
+        if (string(body) != test.output.Body) {
+            t.Errorf("Response should be |" + test.output.Body + "| got |%s|", string(body))
         }
     }
 
@@ -84,9 +90,4 @@ func TestRouter(t *testing.T) {
     if (string(body) != output) {
         t.Errorf("Response should be |" + output + "| got |%s|", string(body))
     }
-
-    // var methods = []string{http.MethodGet}
-
-    // r.Handle({ path: '/login', method: ['GET']}, handler) 
-    // r.Handle({ path: '/img/*', method: ['GET']}, handler)
 }
