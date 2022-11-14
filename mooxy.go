@@ -5,17 +5,13 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"golang.org/x/exp/slices"
 )
-
-type HTTPMethod string
 
 type Router struct {
     NextRoutes map[string]*Router
     Handler *http.Handler
     //AvailableMethods HttpMethodsArray
-    AvailableMethods []HTTPMethod
+    AvailableMethods HttpMethods
 }
 
 func (r *Router) Handle (route *Route, handler http.Handler) {
@@ -30,7 +26,7 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
         }
         if (index == lastElementIndex) {
             currentMatrix[p].Handler = &handler
-            currentMatrix[p].AvailableMethods = route.methods
+            currentMatrix[p].AvailableMethods = NewHttpMethods(route.methods...)
         }
 
         currentMatrix = currentMatrix[p].NextRoutes
@@ -49,8 +45,7 @@ func (router *Router) GetServer(w http.ResponseWriter, r *http.Request) {
     rt := *foundRouter
     handler := *rt.Handler
 
-    available := rt.AvailableMethods
-    if ( !slices.Contains(available, HTTPMethod(r.Method))) {
+    if (!rt.AvailableMethods.Has(HTTPMethod(r.Method))) {
         http.Error(w, "Method not available", 405)
         return
     }
