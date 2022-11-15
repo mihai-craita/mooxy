@@ -65,10 +65,6 @@ func TestRouter(t *testing.T) {
         resp := w.Result()
         body, _ := io.ReadAll(resp.Body)
 
-        // t.Log(resp.StatusCode)
-        // t.Log(resp.Header.Get("Content-Type"))
-        // t.Log(string(body))
-
         if (resp.StatusCode != test.output.StatusCode) {
             t.Errorf("Status code should be %d got %d", test.output.StatusCode, resp.StatusCode)
         }
