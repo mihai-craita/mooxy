@@ -59,8 +59,12 @@ func (router *Router) getRouterForUrl(u url.URL) (h *Router, er error) {
     var routerForPath = router
     for _, p := range pathParts {
         routerForPath = currentMatrix[p]
-        if (routerForPath == nil) {
-            return nil, errors.New("Page not found.")
+        if routerForPath == nil {
+            h := "{id}"
+            routerForPath = currentMatrix[h]
+            if routerForPath == nil {
+                return nil, errors.New("Page not found.")
+            }
         }
         if len(routerForPath.Children) != 0 {
             currentMatrix = routerForPath.Children
