@@ -60,8 +60,7 @@ func (router *Router) getRouterForUrl(u url.URL) (h *Router, er error) {
     for _, p := range pathParts {
         routerForPath = currentMatrix[p]
         if routerForPath == nil {
-            h := "{id}"
-            routerForPath = currentMatrix[h]
+            routerForPath = getVariableRouter(currentMatrix)
             if routerForPath == nil {
                 return nil, errors.New("Page not found.")
             }
@@ -77,6 +76,15 @@ func getPathParts(path string) []string {
     path = strings.Trim(path, "/")
     var pathParts = strings.Split(path, "/")
     return pathParts
+}
+
+func getVariableRouter(routerList map[string]*Router) (*Router) {
+    for k, r := range routerList {
+        if strings.HasPrefix(k, "{") && strings.HasSuffix(k, "}") {
+            return r
+        }
+    }
+    return nil
 }
 
 func NewRouter() *Router {

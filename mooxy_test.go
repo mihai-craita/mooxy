@@ -44,6 +44,7 @@ var testCases = []TestCase {
     {NewRoute("/foo/method/post").Methods(http.MethodPost, http.MethodConnect),      "/foo/method/post", http.MethodGet, NewTestOutput("Method not available\n", 405)},
     {NewRoute("/foo/method/put").Methods(http.MethodPut),        "/foo/method/put",        http.MethodPost, NewTestOutput("Method not available\n", 405)},
     {NewRoute("/foo/bar/{id}").Methods(http.MethodGet),        "/foo/bar/1",        http.MethodGet, NewTestOutput("Route with param", 200)},
+    {NewRoute("/post/{slug}").Methods(http.MethodGet),        "/post/hello-world",        http.MethodGet, NewTestOutput("Route with string param", 200)},
 }
 
 func TestRouter(t *testing.T) {
