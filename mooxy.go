@@ -8,9 +8,8 @@ import (
 )
 
 type Router struct {
-    NextRoutes map[string]*Router
+    Children map[string]*Router
     Handler *http.Handler
-    //AvailableMethods HttpMethodsArray
     AvailableMethods HttpMethods
 }
 
@@ -18,7 +17,7 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
     var pathParts = getPathParts(route.Path)
     var lastElementIndex = len(pathParts) - 1
 
-    currentMatrix := r.NextRoutes
+    currentMatrix := r.Children
     for index, p := range pathParts{
         var c = currentMatrix[p]
         if c == nil {
@@ -29,7 +28,7 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
             currentMatrix[p].AvailableMethods = NewHttpMethods(route.methods...)
         }
 
-        currentMatrix = currentMatrix[p].NextRoutes
+        currentMatrix = currentMatrix[p].Children
     }
 }
 
@@ -56,15 +55,15 @@ func (router *Router) getRouterForUrl(u url.URL) (h *Router, er error) {
     var path = u.Path
     var pathParts = getPathParts(path)
 
-    var currentMatrix = router.NextRoutes
+    var currentMatrix = router.Children
     var routerForPath = router
     for _, p := range pathParts {
         routerForPath = currentMatrix[p]
         if (routerForPath == nil) {
             return nil, errors.New("Page not found.")
         }
-        if len(routerForPath.NextRoutes) != 0 {
-            currentMatrix = routerForPath.NextRoutes
+        if len(routerForPath.Children) != 0 {
+            currentMatrix = routerForPath.Children
         }
     }
     return routerForPath, nil
@@ -77,5 +76,5 @@ func getPathParts(path string) []string {
 }
 
 func NewRouter() *Router {
-    return &Router{ NextRoutes: make(map[string]*Router)}
+    return &Router{ Children: make(map[string]*Router)}
 }
