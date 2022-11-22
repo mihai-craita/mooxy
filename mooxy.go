@@ -42,6 +42,10 @@ func (router *Router) GetServer(w http.ResponseWriter, r *http.Request) {
     }
 
     rt := *foundRouter
+    if (rt.Handler == nil) {
+        http.Error(w, "Page not found.", 404)
+        return
+    }
     handler := *rt.Handler
 
     if (!rt.AvailableMethods.Has(HTTPMethod(r.Method))) {
