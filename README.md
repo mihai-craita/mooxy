@@ -1,12 +1,12 @@
 # 🐮 mooxy 
 Router for url paths, it uses a linked tree for path traversal to move fast trough large number of routes.
 
-Instalation
+### Instalation
 ``` 
 go get github.com/mihai-craita/mooxy
 ```
 
-Simple example
+### Example
 ```
 import "github.com/mihai-craita/mooxy"
 
