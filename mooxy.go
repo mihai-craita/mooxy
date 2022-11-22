@@ -32,7 +32,7 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
     }
 }
 
-func (router *Router) GetServer(w http.ResponseWriter, r *http.Request) {
+func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     // here we will match to the correct handler and ServeHTTP
     var foundRouter, err = router.getRouterForUrl(*r.URL)
 

@@ -129,7 +129,7 @@ func TestRouter(t *testing.T) {
         w := httptest.NewRecorder()
 
         // make the call
-        router.GetServer(w, req)
+        router.ServeHTTP(w, req)
 
         resp := w.Result()
         body, _ := io.ReadAll(resp.Body)
