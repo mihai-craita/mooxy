@@ -10,7 +10,7 @@ import (
 type Router struct {
     Children map[string]*Router
     Handler *http.Handler
-    AvailableMethods HttpMethods
+    AvailableMethods HTTPMethods
 }
 
 func (r *Router) Handle (route *Route, handler http.Handler) {
@@ -25,7 +25,7 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
         }
         if (index == lastElementIndex) {
             currentMatrix[p].Handler = &handler
-            currentMatrix[p].AvailableMethods = NewHttpMethods(route.methods...)
+            currentMatrix[p].AvailableMethods = route.methods
         }
 
         currentMatrix = currentMatrix[p].Children

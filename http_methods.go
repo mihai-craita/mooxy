@@ -2,21 +2,23 @@ package mooxy
 
 type HTTPMethod string
 
-type HttpMethods struct {
-    methods []HTTPMethod
+type HTTPMethods struct {
+    methods map[HTTPMethod]bool
 }
 
-func (h HttpMethods) Has(method HTTPMethod) (bool) {
-    for _, val := range h.methods {
-		if val == method {
-			return true
-		}
+func (h HTTPMethods) Has(method HTTPMethod) (bool) {
+	v, ok := h.methods[method]
+	if ok {
+		return v
 	}
 
 	return false
 }
 
-func NewHttpMethods(m ...HTTPMethod) (HttpMethods) {
-    return HttpMethods{methods: m} 
+func (h HTTPMethods) Add(method HTTPMethod) {
+	h.methods[method] = true;
 }
 
+func NewHttpMethods() (HTTPMethods) {
+	return HTTPMethods{methods: make(map[HTTPMethod]bool)} 
+}
