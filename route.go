@@ -14,5 +14,5 @@ func (r *Route) Methods(methods ...HTTPMethod) *Route {
 }
 
 func NewRoute(path string) *Route {
-    return &Route { Path: path, methods: []HTTPMethod{http.MethodGet, http.MethodPost} }
+    return &Route { Path: path, methods: []HTTPMethod{http.MethodGet} }
 }
