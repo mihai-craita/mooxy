@@ -6,17 +6,18 @@ import (
 
 func TestHttpMethods(t *testing.T) {
     sut := NewHttpMethods()
-    sut.Add("GET")
+    handler := Controller{}
+    sut.Add("GET", handler)
     if !sut.Has("GET") {
         t.Errorf("Method GET shoul be available")
     }
 
-    sut.Add("POST")
+    sut.Add("POST", handler)
     if !sut.Has("POST") {
         t.Errorf("Method POST should be available")
     }
 
-    sut.Add("PUT")
+    sut.Add("PUT", handler)
     if !sut.Has("PUT") {
         t.Errorf("Method PUT should be available")
     }
@@ -25,4 +26,3 @@ func TestHttpMethods(t *testing.T) {
         t.Errorf("Method DELETE should be available")
     }
 }
-

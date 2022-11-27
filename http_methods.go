@@ -1,24 +1,26 @@
 package mooxy
 
+import "net/http"
+
 type HTTPMethod string
 
 type HTTPMethods struct {
-    methods map[HTTPMethod]bool
+    methods map[HTTPMethod]http.Handler
 }
 
 func (h HTTPMethods) Has(method HTTPMethod) (bool) {
-	v, ok := h.methods[method]
+	_, ok := h.methods[method]
 	if ok {
-		return v
+		return true
 	}
 
 	return false
 }
 
-func (h HTTPMethods) Add(method HTTPMethod) {
-	h.methods[method] = true;
+func (h HTTPMethods) Add(method HTTPMethod, handler http.Handler) {
+	h.methods[method] = handler;
 }
 
 func NewHttpMethods() (HTTPMethods) {
-	return HTTPMethods{methods: make(map[HTTPMethod]bool)} 
+	return HTTPMethods{methods: make(map[HTTPMethod]http.Handler)} 
 }

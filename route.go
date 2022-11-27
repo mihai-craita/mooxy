@@ -8,7 +8,7 @@ type Route struct {
 // set allowed methods for route
 func (r *Route) Methods(methods ...HTTPMethod) *Route {
 	for _, method := range methods {
-		r.methods.Add(method)
+		r.methods.Add(method, nil)
 	}
     return r
 }

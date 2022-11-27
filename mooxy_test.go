@@ -113,11 +113,11 @@ var testCases = []TestCase {
         NewTestRequest("/img", http.MethodGet),
         NewTestOutput("Page not found.\n", 404),
     },
-    // {
-    //     NewRoute("/foo").Methods(http.MethodPost),
-    //     NewTestRequest("/foo", http.MethodPost),
-    //     NewTestOutput("Add post to a route that has get", 200),
-    // },
+    {
+        NewRoute("/foo").Methods(http.MethodPost),
+        NewTestRequest("/foo", http.MethodPost),
+        NewTestOutput("Add post to a route that has get", 200),
+    },
 }
 
 func TestRouter(t *testing.T) {
@@ -140,10 +140,10 @@ func TestRouter(t *testing.T) {
         body, _ := io.ReadAll(resp.Body)
 
         if (resp.StatusCode != test.output.StatusCode) {
-            t.Errorf("Status code should be %d got %d for request %s", test.output.StatusCode, resp.StatusCode, test.request.path)
+            t.Errorf("Status code should be: %d got: %d for request %s", test.output.StatusCode, resp.StatusCode, test.request.path)
         }
         if (string(body) != test.output.Body) {
-            t.Errorf("Response should be |" + test.output.Body + "| got |%s|", string(body))
+            t.Errorf("Response for request %s should be: |%s| got: |%s|", test.request.path, test.output.Body, string(body))
         }
     }
 }

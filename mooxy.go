@@ -25,7 +25,9 @@ func (r *Router) Handle (route *Route, handler http.Handler) {
         }
         if (index == lastElementIndex) {
             currentMatrix[p].Handler = &handler
-            currentMatrix[p].AvailableMethods = route.methods
+            for method := range route.methods.methods {
+                currentMatrix[p].AvailableMethods.Add(method, handler)
+            }
         }
 
         currentMatrix = currentMatrix[p].Children
@@ -46,12 +48,12 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Page not found.", 404)
         return
     }
-    handler := *rt.Handler
 
     if (!rt.AvailableMethods.Has(HTTPMethod(r.Method))) {
         http.Error(w, "Method not available", 405)
         return
     }
+    handler := rt.AvailableMethods.methods[HTTPMethod(r.Method)]
     handler.ServeHTTP(w, r)
 }
 
@@ -92,5 +94,5 @@ func getVariableRouter(routerList map[string]*Router) (*Router) {
 }
 
 func NewRouter() *Router {
-    return &Router{ Children: make(map[string]*Router)}
+    return &Router{ Children: make(map[string]*Router), AvailableMethods: NewHttpMethods()}
 }
